@@ -262,12 +262,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware
-cors_origins = config.CORS_ORIGINS if config.CORS_ORIGINS != ['*'] else [FRONTEND_ORIGIN, "http://localhost:3000"]
+# CORS middleware - Allow all origins for Render deployment
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_credentials=True,
+    allow_origins=["*"],  # Allow all origins for easier deployment
+    allow_credentials=False,  # Must be False when allow_origins is ["*"]
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -1,334 +1,431 @@
-# 🚂 Railway.app Deployment Guide
+# 🚂 Railway.app Deployment Guide - Step by Step
 
-## Prerequisites
-
-1. **GitHub Account** with your repository
-2. **Railway.app Account** (free tier available)
-3. **Git** installed locally
-4. **All changes committed** to GitHub
+## Your Current Setup
+- ✅ **Frontend**: https://reviewer-recommendation-system-1.onrender.com/ (Render)
+- 🔧 **Backend**: Deploying to Railway.app (this guide)
 
 ---
 
-## Step-by-Step Deployment
+## Prerequisites Checklist
 
-### Step 1: Create Railway Account
-
-1. Go to [https://railway.app](https://railway.app)
-2. Click **"Start a New Project"** or **"Login with GitHub"**
-3. Authorize Railway to access your GitHub repositories
-
----
-
-### Step 2: Create New Project
-
-1. Click **"New Project"** on Railway dashboard
-2. Select **"Deploy from GitHub repo"**
-3. Choose your repository: `merajuddinmohammed/Reviewer-Recommendation-System`
-4. Railway will automatically detect it's a Python project
+Before you start, make sure you have:
+- ✅ GitHub Account with repository pushed
+- ✅ All latest changes committed to GitHub (LambdaRank fixes included)
+- ✅ Railway configuration files committed:
+  - `backend/Procfile`
+  - `backend/railway.json`
+  - `backend/nixpacks.toml`
+  - `backend/requirements.txt`
 
 ---
 
-### Step 3: Configure Deployment Settings
+## Step-by-Step Deployment (10 Minutes)
 
-#### Option A: Automatic Configuration (Recommended)
+### Step 1: Create Railway Account (2 minutes)
 
-Railway will auto-detect:
-- ✅ Python project
-- ✅ `requirements.txt` 
-- ✅ `Procfile` for startup command
-- ✅ `railway.json` for health checks
+1. **Open Railway.app**:
+   - Go to: https://railway.app
+   
+2. **Sign Up/Login**:
+   - Click **"Login with GitHub"**
+   - Authorize Railway to access your repositories
+   - Accept permissions
 
-#### Option B: Manual Configuration
-
-If auto-detection doesn't work:
-
-1. Go to **Settings** → **Deploy**
-2. Set **Root Directory**: `/backend`
-3. Set **Build Command**: `pip install -r requirements.txt`
-4. Set **Start Command**: `uvicorn app:app --host 0.0.0.0 --port $PORT`
+✅ **You're now logged into Railway!**
 
 ---
 
-### Step 4: Set Environment Variables
+### Step 2: Create New Project (1 minute)
 
-Railway needs environment variables for your app:
+1. **On Railway Dashboard**:
+   - Click **"New Project"** (big purple button)
+   
+2. **Select Deployment Method**:
+   - Choose **"Deploy from GitHub repo"**
+   
+3. **Choose Your Repository**:
+   - Find and select: `merajuddinmohammed/Reviewer-Recommendation-System`
+   - Click on it
 
-1. Go to **Variables** tab
-2. Add these variables:
+4. **Wait for Initial Setup**:
+   - Railway will analyze your repository
+   - It will auto-detect it's a Python project
 
-```
-PORT=8000
-FRONTEND_ORIGIN=https://your-frontend-url.vercel.app
-PYTHON_VERSION=3.11
-```
-
-**Important Environment Variables:**
-
-| Variable | Value | Description |
-|----------|-------|-------------|
-| `PORT` | `8000` | Port for Railway (Railway will override with `$PORT`) |
-| `FRONTEND_ORIGIN` | Your frontend URL | CORS allowed origin |
-| `PYTHON_VERSION` | `3.11` | Python version to use |
+✅ **Project created!**
 
 ---
 
-### Step 5: Configure Root Directory
+### Step 3: Configure Root Directory (CRITICAL!) (2 minutes)
 
-**CRITICAL**: Your backend code is in the `/backend` folder, so:
+Your backend code is in the `backend/` folder, not the root. You MUST configure this:
 
-1. Go to **Settings** → **Service Settings**
-2. Set **Root Directory**: `backend`
-3. Click **Save**
+1. **In Railway Dashboard**:
+   - Click on your service (you should see it)
+   
+2. **Go to Settings**:
+   - Click **"Settings"** tab on the left
+   
+3. **Set Root Directory**:
+   - Find **"Root Directory"** section
+   - Click **"Configure"** or the edit icon
+   - Enter: `backend`
+   - Click **"Save"** or checkmark
 
----
-
-### Step 6: Deploy
-
-1. Click **Deploy** button or push to GitHub
-2. Railway will:
-   - ✅ Clone your repository
-   - ✅ Install Python 3.11
-   - ✅ Install dependencies from `requirements.txt`
-   - ✅ Run health check on `/health` endpoint
-   - ✅ Start your FastAPI app
-
-**Deployment Time**: ~5-10 minutes (first time)
+✅ **Root directory configured!**
 
 ---
 
-### Step 7: Monitor Deployment
+### Step 4: Add Environment Variables (Optional) (2 minutes)
 
-1. Go to **Deployments** tab
-2. Watch the build logs:
-   ```
-   ⚙️ Building...
-   📦 Installing dependencies...
-   ✅ Build successful!
-   🚀 Starting service...
-   ✅ Healthy!
-   ```
+1. **Go to Variables Tab**:
+   - Click **"Variables"** tab on the left
+   
+2. **Add Frontend URL** (recommended):
+   - Click **"+ New Variable"**
+   - **Variable Name**: `FRONTEND_ORIGIN`
+   - **Value**: `https://reviewer-recommendation-system-1.onrender.com`
+   - Click **"Add"**
 
-3. If deployment fails, check:
-   - Build logs for errors
-   - `/health` endpoint is accessible
-   - All required files are committed
+**Note**: Railway auto-provides `PORT` variable, so you don't need to add it!
+
+✅ **Environment variables set!**
 
 ---
 
-### Step 8: Get Your Backend URL
+### Step 5: Deploy! (5-10 minutes)
 
-1. Once deployed, Railway provides a URL like:
-   ```
-   https://your-app-name.railway.app
-   ```
+Railway will now automatically deploy your backend:
 
-2. Test your backend:
+1. **Watch the Deployment**:
+   - Click **"Deployments"** tab on the left
+   - You'll see the current deployment building
+   
+2. **Monitor Build Logs**:
+   - Click on the deployment to see logs in real-time
+   - You should see:
+     ```
+     ⚙️ Preparing build...
+     📦 Installing Python 3.11...
+     📥 Installing dependencies from requirements.txt...
+     ✅ Build complete
+     🚀 Starting application...
+     ✅ Application started on port $PORT
+     ```
+
+3. **Wait for "Running" Status**:
+   - Deployment status will change from "Building" → "Running"
+   - First deployment takes ~5-10 minutes
+
+✅ **Backend deployed!**
+
+---
+
+### Step 6: Get Your Backend URL (1 minute)
+
+1. **Go to Networking Tab**:
+   - Click **"Networking"** tab on the left
+   
+2. **Find Public Domain**:
+   - Under "Public Networking", you'll see a generated domain like:
+     ```
+     reviewer-recommendation-backend-production-XXXX.up.railway.app
+     ```
+   - **Copy this URL** (you'll need it!)
+
+✅ **Backend URL obtained!**
+
+---
+
+### Step 7: Test Your Backend (1 minute)
+
+Let's verify your backend is working:
+
+1. **Test Health Endpoint**:
    ```bash
-   curl https://your-app-name.railway.app/health
+   curl https://your-railway-url.railway.app/health
    ```
-
-   Expected response:
+   
+   **Expected Response**:
    ```json
    {
      "status": "healthy",
      "models_loaded": true,
      "tfidf_model": true,
      "faiss_index": true,
-     "bertopic_model": false,
      "lgbm_model": true
    }
    ```
 
+2. **If you get an error**:
+   - Check Deployments tab for errors
+   - See Troubleshooting section below
+
+✅ **Backend is healthy!**
+
 ---
 
-### Step 9: Update Frontend with New Backend URL
+### Step 8: Update Frontend to Use Railway Backend (5 minutes)
 
-1. Go to your frontend deployment (Vercel/Netlify)
-2. Update environment variable:
+Now connect your frontend to the new Railway backend:
+
+1. **Go to Render Dashboard**:
+   - Visit: https://dashboard.render.com
+   - Find your frontend service: `reviewer-recommendation-system-1`
+   
+2. **Update Environment Variable**:
+   - Click on your frontend service
+   - Go to **"Environment"** tab
+   - Find `VITE_API_URL` or add new variable:
+     - **Key**: `VITE_API_URL`
+     - **Value**: `https://your-railway-url.railway.app` *(your Railway backend URL)*
+     - **Important**: No trailing slash!
+   - Click **"Save Changes"**
+   
+3. **Redeploy Frontend**:
+   - Go to **"Manual Deploy"** section
+   - Click **"Deploy latest commit"**
+   - Wait 2-3 minutes for redeploy
+
+✅ **Frontend connected to Railway backend!**
+
+---
+
+### Step 9: Test End-to-End (2 minutes)
+
+1. **Open Your Frontend**:
+   - Go to: https://reviewer-recommendation-system-1.onrender.com/
+   
+2. **Submit a Test Paper**:
+   - Enter a paper title and abstract
+   - Add some authors (optional)
+   - Click submit
+   
+3. **Verify Recommendations**:
+   - You should see reviewer recommendations
+   - Check browser console (F12) for any errors
+   - LambdaRank should be working (53% P@5 accuracy)
+
+✅ **Everything working end-to-end!**
+
+---
+
+### Step 10: Enable Auto-Deploy (1 minute)
+
+Set up automatic deployments when you push to GitHub:
+
+1. **In Railway Settings**:
+   - Go to **"Settings"** tab
+   - Find **"Service"** section
+   
+2. **Verify Auto-Deploy**:
+   - Make sure **"Automatic Deployments"** is enabled
+   - It should be ON by default
+   
+3. **Test It**:
+   - Make a small change to your code
+   - Push to GitHub
+   - Railway will automatically deploy!
+
+✅ **Auto-deploy enabled!**
+
+---
+
+## 🔧 Troubleshooting Common Issues
+
+### Issue 1: "Application not found" or 404 Error
+
+**Cause**: Root directory not set correctly
+
+**Solution**:
+1. Go to Railway **Settings** tab
+2. Set **Root Directory** to: `backend`
+3. Click **Save**
+4. Wait for redeploy
+
+---
+
+### Issue 2: Build Fails with "ModuleNotFoundError"
+
+**Cause**: Missing dependencies in requirements.txt
+
+**Solution**:
+1. Check Railway build logs for the missing module
+2. Add it to `backend/requirements.txt`
+3. Commit and push:
+   ```bash
+   git add backend/requirements.txt
+   git commit -m "Add missing dependency"
+   git push
    ```
-   VITE_API_URL=https://your-app-name.railway.app
-   ```
-
-3. Redeploy frontend to use new backend
+4. Railway will auto-deploy
 
 ---
-
-### Step 10: Enable Custom Domain (Optional)
-
-1. Go to **Settings** → **Domains**
-2. Click **Generate Domain** (free Railway subdomain)
-3. Or add your custom domain:
-   - Click **Custom Domain**
-   - Add CNAME record: `your-domain.com` → `your-app-name.railway.app`
-
----
-
-## Railway vs Render Comparison
-
-| Feature | Railway.app | Render.com |
-|---------|-------------|------------|
-| **Free Tier** | $5 credit/month | 750 hours/month |
-| **Cold Start** | ~1-2 seconds | ~30-60 seconds |
-| **Build Time** | ~3-5 minutes | ~5-10 minutes |
-| **Memory Limit** | 8 GB (free) | 512 MB (free) |
-| **Auto-deploy** | ✅ Yes | ✅ Yes |
-| **Custom Domain** | ✅ Yes | ✅ Yes |
-| **Persistent Storage** | ✅ Yes | ❌ No (free tier) |
-
-**Recommendation**: Railway.app is **MUCH faster** than Render for cold starts!
-
----
-
-## Troubleshooting
-
-### Issue 1: Build Fails with "ModuleNotFoundError"
-
-**Solution**: Check `requirements.txt` has all dependencies:
-```bash
-cd backend
-pip freeze > requirements.txt
-git add requirements.txt
-git commit -m "Update requirements.txt"
-git push
-```
-
-### Issue 2: Health Check Fails
-
-**Solution**: Ensure `/health` endpoint returns 200 status:
-```python
-@app.get("/health")
-async def health():
-    return {"status": "healthy"}
-```
 
 ### Issue 3: Models Not Loading
 
-**Solution**: Ensure model files are committed to git:
+**Cause**: Model files too large or not committed
+
+**Check file sizes**:
 ```bash
-git add backend/models/*.pkl
-git add backend/data/*.faiss
-git add backend/data/*.npy
-git commit -m "Add model files"
-git push
+cd backend
+ls -lh models/*.pkl data/*.faiss
 ```
 
-**Note**: If model files are too large (>100MB), use Git LFS:
+**If files are >100MB**, use Git LFS:
 ```bash
 git lfs install
 git lfs track "*.pkl"
 git lfs track "*.faiss"
+git lfs track "*.db"
 git add .gitattributes
 git commit -m "Add Git LFS tracking"
 git push
 ```
 
-### Issue 4: Port Binding Error
+---
 
-**Solution**: Use `$PORT` environment variable:
-```python
-import os
-port = int(os.getenv("PORT", 8000))
-```
+### Issue 4: Health Check Returns Error
 
-In Procfile:
+**Cause**: Application not starting properly
+
+**Solution**:
+1. Check Railway **Deployments** logs
+2. Look for Python errors or missing files
+3. Common fixes:
+   - Ensure all model files exist in `backend/models/`
+   - Ensure database exists in `backend/data/papers.db`
+   - Check `backend/app.py` loads correctly
+
+---
+
+### Issue 5: Frontend Can't Connect to Backend
+
+**Cause**: CORS or wrong URL
+
+**Solution**:
+1. Verify backend URL is correct (no trailing slash)
+2. Check CORS in `app.py` allows your frontend:
+   ```python
+   allow_origins=["*"]  # Should already allow all origins
+   ```
+3. Check browser console for specific error messages
+
+---
+
+### Issue 6: "Port already in use" Error
+
+**Cause**: Port configuration issue
+
+**Your Procfile should have**:
 ```
 web: uvicorn app:app --host 0.0.0.0 --port $PORT
 ```
 
-### Issue 5: CORS Errors
-
-**Solution**: Update `app.py` to allow Railway domain:
-```python
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Or specify Railway URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-```
+Railway automatically provides `$PORT`, so this should work by default.
 
 ---
 
-## Post-Deployment Checklist
+## ✅ Post-Deployment Checklist
 
-- [ ] Backend health check passes
-- [ ] `/health` endpoint returns 200
-- [ ] Models load successfully
-- [ ] Frontend can connect to backend
-- [ ] CORS is configured correctly
-- [ ] Environment variables are set
-- [ ] Custom domain configured (optional)
-- [ ] Auto-deploy enabled for GitHub pushes
+Use this to verify everything is working:
+
+- [ ] Railway deployment shows "Running" status
+- [ ] Health check passes: `curl https://your-url.railway.app/health`
+- [ ] Frontend environment variable updated with Railway URL
+- [ ] Frontend redeployed on Render
+- [ ] Can submit paper and get recommendations
+- [ ] No CORS errors in browser console
+- [ ] LambdaRank model working (check recommendation quality)
+- [ ] Auto-deploy enabled for future updates
 
 ---
 
-## Useful Railway CLI Commands
+## 📊 What Your Backend Includes
 
-Install Railway CLI:
-```bash
-npm i -g @railway/cli
-```
+Your Railway deployment includes:
 
-Login:
-```bash
-railway login
-```
+✅ **Improved LambdaRank Model**:
+- 53.33% P@5 accuracy (was 0%)
+- 49.59% nDCG@10
+- Trained on 5000 samples with 40% positive labels
 
-Link project:
+✅ **All Models**:
+- `lgbm_ranker.pkl` - LambdaRank model (5.6 KB)
+- `tfidf_vectorizer.pkl` - TF-IDF model
+- `faiss_index.faiss` - Vector search index
+- `id_map.npy` - FAISS ID mapping
+
+✅ **Database**:
+- `papers.db` - SQLite database with papers and authors
+
+✅ **Fast Performance**:
+- Cold start: ~1-2 seconds
+- Warm requests: <100ms
+
+---
+
+## 🎯 Quick Command Reference
+
 ```bash
+# Test backend health
+curl https://your-railway-url.railway.app/health
+
+# View Railway logs (requires Railway CLI)
+railway logs
+
+# Redeploy manually (requires Railway CLI)
+railway up
+
+# Link local project to Railway (requires Railway CLI)
 railway link
 ```
 
-View logs:
-```bash
-railway logs
-```
-
-Open in browser:
-```bash
-railway open
-```
-
-Deploy manually:
-```bash
-railway up
-```
-
 ---
 
-## Cost Estimation
+## 💰 Cost & Usage
 
 **Railway Free Tier**:
-- $5 credit/month (enough for ~100 hours of uptime)
-- After credit exhausted, service pauses until next month
+- $5 credit per month
+- ~100 hours of uptime
+- Resets monthly
+- Perfect for testing and light use
 
-**Railway Pro Plan** ($20/month):
-- Unlimited usage
-- Priority support
-- No cold starts
-- Persistent storage
-
-**Recommendation**: Start with free tier, upgrade if needed!
-
----
-
-## Next Steps
-
-1. ✅ Deploy backend to Railway
-2. ✅ Update frontend environment variable
-3. ✅ Test end-to-end flow
-4. ✅ Monitor Railway dashboard for issues
-5. ✅ Set up alerts for downtime (optional)
+**When to Upgrade to Pro ($20/month)**:
+- Need 24/7 uptime
+- High traffic (>100 hours/month)
+- Need priority support
+- Want no cold starts
 
 ---
 
-## Support
+## 📚 Helpful Resources
 
 - **Railway Docs**: https://docs.railway.app
-- **Railway Discord**: https://discord.gg/railway
+- **Railway Discord**: https://discord.gg/railway (great community!)
 - **Railway Status**: https://status.railway.app
+- **Your Repository**: https://github.com/merajuddinmohammed/Reviewer-Recommendation-System
 
 ---
 
-**Happy Deploying! 🚂**
+## 🚀 Next Steps After Deployment
+
+1. **Monitor Your App**:
+   - Check Railway dashboard daily
+   - Set up alerts for failures
+   - Monitor credit usage
+
+2. **Optimize Performance**:
+   - Review API response times
+   - Check model loading times
+   - Monitor memory usage
+
+3. **Future Improvements**:
+   - Add caching for common queries
+   - Implement rate limiting
+   - Add API analytics
+
+---
+
+**Your backend is now deployed on Railway! Much faster than Render! ⚡**
+
+**Need Help?** Check the troubleshooting section or contact Railway support.

@@ -27,7 +27,7 @@ faiss-cpu==1.12.0
 # NLP & Embeddings (CPU version for production)
 sentence-transformers==5.1.2
 transformers==4.57.1
-torch==2.9.0
+torch>=2.0.0
 tokenizers==0.21.0
 huggingface-hub==0.27.1
 

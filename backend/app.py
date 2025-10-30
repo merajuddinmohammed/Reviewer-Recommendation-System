@@ -640,16 +640,19 @@ async def recommend(
     
     # Generate features using make_features_for_query
     try:
+        # Combine title and abstract for query text
+        query_text = f"{query_title}. {query_abstract}" if query_abstract else query_title
+        
         features_df = make_features_for_query(
-            db_path=models.db_path,
-            query_title=query_title,
-            query_abstract=query_abstract,
-            query_authors=query_authors,
-            query_affiliations=query_affiliations,
-            tfidf_model_path=TFIDF_MODEL_PATH,
-            faiss_index_path=FAISS_INDEX_PATH,
-            id_map_path=FAISS_ID_MAP_PATH,
-            topic_model_path=BERTOPIC_MODEL_PATH if BERTOPIC_MODEL_PATH.exists() else None
+            query_text=query_text,
+            db=models.db_path,
+            tfidf_engine=models.tfidf,
+            faiss_index=models.faiss_index,
+            id_map=models.id_map,
+            embedding_model=models.embeddings,
+            topic_model=None,  # Not used currently
+            query_authors=query_authors if query_authors else None,
+            query_affiliation=query_affiliations[0] if query_affiliations else None
         )
         
         logger.info(f"Generated features for {len(features_df)} candidates")

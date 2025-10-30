@@ -210,13 +210,10 @@ async def lifespan(app: FastAPI):
     else:
         logger.warning(f"✗ FAISS ID map not found at {FAISS_ID_MAP_PATH}")
     
-    # Load Embeddings model (REQUIRED for query encoding)
-    try:
-        from embedding import Embeddings
-        models.embeddings = Embeddings()
-        logger.info("✓ Embeddings model initialized (SciBERT)")
-    except Exception as e:
-        logger.error(f"✗ Failed to initialize embeddings model: {e}")
+    # Don't load Embeddings model at startup to save memory (lazy load on first use)
+    # This reduces initial memory footprint on free tier
+    models.embeddings = None
+    logger.info("⚠ Embeddings model will be lazy-loaded on first request (memory optimization)")
     
     # Load BERTopic model (OPTIONAL)
     if BERTOPIC_MODEL_PATH.exists():
@@ -649,6 +646,13 @@ async def recommend(
     
     # Generate features using make_features_for_query
     try:
+        # Lazy load embeddings model on first use (memory optimization for free tier)
+        if models.embeddings is None:
+            logger.info("Loading embeddings model on first request...")
+            from embedding import Embeddings
+            models.embeddings = Embeddings()
+            logger.info("✓ Embeddings model loaded")
+        
         # Combine title and abstract for query text
         query_text = f"{query_title}. {query_abstract}" if query_abstract else query_title
         

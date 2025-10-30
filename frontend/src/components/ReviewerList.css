@@ -1,0 +1,296 @@
+.reviewer-list {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+}
+
+.no-reviewers {
+  padding: 3rem;
+  text-align: center;
+  color: #999;
+  font-size: 1.1rem;
+}
+
+.reviewer-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.reviewer-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.reviewer-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.reviewer-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.2s ease;
+}
+
+.reviewer-table tbody tr:hover {
+  background-color: #f9f9ff;
+}
+
+.reviewer-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.reviewer-table td {
+  padding: 1.25rem 1rem;
+  vertical-align: top;
+}
+
+.rank-cell {
+  width: 80px;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.name-cell {
+  min-width: 200px;
+}
+
+.reviewer-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 1.05rem;
+}
+
+.affiliation-cell {
+  min-width: 180px;
+  color: #666;
+}
+
+.no-affiliation {
+  color: #999;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.score-cell {
+  width: 100px;
+}
+
+.score-value {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  background-color: #f0f4ff;
+  color: #667eea;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.chart-cell {
+  min-width: 200px;
+}
+
+.evidence-cell {
+  min-width: 150px;
+}
+
+.evidence-toggle {
+  background-color: #f5f5f5;
+  border: 2px solid #ddd;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #667eea;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.evidence-toggle:hover {
+  background-color: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.evidence-toggle.expanded {
+  background-color: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.evidence-list {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f9f9ff;
+  border-radius: 8px;
+  border: 1px solid #e5e5ff;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.evidence-list h4 {
+  margin-bottom: 0.75rem;
+  color: #667eea;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.evidence-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.evidence-item {
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  background-color: white;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.evidence-item:last-child {
+  margin-bottom: 0;
+}
+
+.evidence-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.evidence-title {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.evidence-similarity {
+  flex-shrink: 0;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.evidence-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.evidence-year {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.similarity-bar {
+  height: 6px;
+  background-color: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.similarity-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
+  transition: width 0.3s ease;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .reviewer-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .reviewer-table thead,
+  .reviewer-table tbody,
+  .reviewer-table tr,
+  .reviewer-table th,
+  .reviewer-table td {
+    display: block;
+  }
+  
+  .reviewer-table thead {
+    display: none;
+  }
+  
+  .reviewer-table tr {
+    margin-bottom: 1.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  
+  .reviewer-table td {
+    padding: 0.5rem 0;
+    border: none;
+  }
+  
+  .reviewer-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #667eea;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+  }
+  
+  .rank-cell,
+  .name-cell,
+  .affiliation-cell,
+  .score-cell,
+  .chart-cell,
+  .evidence-cell {
+    width: 100%;
+    min-width: unset;
+  }
+  
+  .rank-badge {
+    margin-bottom: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .evidence-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .evidence-similarity {
+    align-self: flex-start;
+  }
+}

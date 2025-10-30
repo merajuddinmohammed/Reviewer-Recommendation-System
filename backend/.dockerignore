@@ -1,0 +1,116 @@
+# ============================================================================
+# Docker Ignore - Exclude unnecessary files from Docker build
+# ============================================================================
+
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (not needed in production)
+*.md
+!README.md
+docs/
+
+# Test files
+tests/
+test_*.py
+*_test.py
+pytest.ini
+.pytest_cache/
+
+# Development scripts (not needed in production)
+ingest.py
+build_vectors.py
+build_tfidf.py
+build_training_data.py
+train_ranker.py
+coauthor_graph_test.py
+verify_app.py
+test_pdf.py
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+tmp/
+temp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large raw data files (if any)
+raw_papers/
+pdfs/
+*.pdf
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Coverage reports
+.coverage
+htmlcov/
+.tox/
+
+# Environment files (use Docker ENV instead)
+.env
+.env.local
+.env.production
+
+# Docker files (don't need these inside the image)
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Frontend files (separate build)
+frontend/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# ============================================================================
+# Notes:
+# ============================================================================
+# This file tells Docker which files to exclude when building the image.
+# Smaller context = faster builds and smaller images.
+#
+# The Dockerfile will explicitly COPY only the files it needs:
+# - Python source files (app.py, db_utils.py, etc.)
+# - Data directory (data/)
+# - Models directory (models/)
+# - requirements.txt
+#
+# Everything else listed here will be excluded from the build context.
+# ============================================================================

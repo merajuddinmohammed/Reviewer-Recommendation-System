@@ -472,7 +472,7 @@ def train_ranker(
     logger.info("")
     logger.info("Step 3: Training LambdaRank model...")
     
-    # Configure parameters
+    # Configure parameters (optimized for imbalanced ranking data)
     params = {
         'objective': 'lambdarank',
         'metric': 'ndcg',
@@ -480,9 +480,15 @@ def train_ranker(
         'num_leaves': num_leaves,
         'learning_rate': learning_rate,
         'min_data_in_leaf': min_data_in_leaf,
-        'feature_fraction': 0.8,
-        'bagging_fraction': 0.8,
-        'bagging_freq': 5,
+        'max_depth': 6,  # Limit depth to prevent overfitting
+        'min_gain_to_split': 0.1,  # Require meaningful splits
+        'feature_fraction': 0.9,  # Use more features (we only have 9)
+        'bagging_fraction': 0.9,  # Use more data
+        'bagging_freq': 3,  # More frequent bagging
+        'lambda_l1': 0.1,  # L1 regularization
+        'lambda_l2': 0.1,  # L2 regularization
+        'min_data_per_group': 3,  # Minimum samples per query group
+        'max_bin': 255,  # Default bin size
         'verbose': -1,
         'seed': seed,
         'force_col_wise': True,  # Faster for small datasets
@@ -633,29 +639,29 @@ Examples:
     parser.add_argument(
         '--num-leaves',
         type=int,
-        default=31,
-        help='Max number of leaves in tree (default: 31)'
+        default=15,
+        help='Max number of leaves in tree (default: 15)'
     )
     
     parser.add_argument(
         '--learning-rate',
         type=float,
-        default=0.05,
-        help='Learning rate (default: 0.05)'
+        default=0.01,
+        help='Learning rate (default: 0.01)'
     )
     
     parser.add_argument(
         '--n-estimators',
         type=int,
-        default=500,
-        help='Number of boosting rounds (default: 500)'
+        default=1000,
+        help='Number of boosting rounds (default: 1000)'
     )
     
     parser.add_argument(
         '--min-data-in-leaf',
         type=int,
-        default=20,
-        help='Minimum samples per leaf (default: 20)'
+        default=5,
+        help='Minimum samples per leaf (default: 5)'
     )
     
     args = parser.parse_args()

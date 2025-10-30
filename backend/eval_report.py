@@ -548,13 +548,13 @@ def rank_by_lambdarank(
     try:
         features_df = make_features_for_query(
             query_text=query_text,
-            db_path=db_path,
+            db=db_path,
             tfidf_engine=tfidf_engine,
             embedding_model=embedding_model,
             faiss_index=faiss_index,
             id_map=id_map,
             query_authors=[],  # No authors to exclude
-            query_affiliations=[]
+            query_affiliation=None
         )
         
         if features_df.empty:

@@ -294,11 +294,12 @@ def get_weak_positive_authors(
     author_ids = set()
     
     try:
-        # Compute TF-IDF similarities
-        tfidf_sims = tfidf_engine.transform_query(query_text, return_scores=True)
+        # Compute TF-IDF similarities using most_similar method
+        tfidf_results = tfidf_engine.most_similar(query_text, topn=topn, return_scores=True)
+        tfidf_paper_ids = [pid for pid, score in tfidf_results]
         
         # Compute embedding similarities
-        query_emb = emb_model.encode([query_text])[0]
+        query_emb = emb_model.encode_texts([query_text], normalize=True)[0]
         query_emb = query_emb.reshape(1, -1).astype('float32')
         
         # FAISS search
@@ -306,13 +307,6 @@ def get_weak_positive_authors(
         
         # Get paper IDs from FAISS results
         similar_paper_ids = [int(id_map[idx]) for idx in indices[0] if idx < len(id_map)]
-        
-        # Also get top TF-IDF paper IDs
-        tfidf_paper_ids = [pid for pid, score in sorted(
-            tfidf_sims.items(), 
-            key=lambda x: x[1], 
-            reverse=True
-        )[:topn]]
         
         # Combine and deduplicate
         all_paper_ids = list(set(similar_paper_ids[:topn] + tfidf_paper_ids))
@@ -375,32 +369,32 @@ def get_positive_authors(
     query_author_id = query['author_id']
     query_author_name = query['author_name']
     
-    # Strategy 1: Reference authors
+    # Strategy 1: Reference authors (strong signal)
     ref_authors = get_reference_authors(db_path, query['paper_id'])
     positive_ids.update(ref_authors)
     logger.debug(f"Query {query['paper_id']}: {len(ref_authors)} reference authors")
     
-    # Strategy 2: Co-author neighborhood
-    if len(positive_ids) < n_positives:
-        coauthor_ids = get_coauthor_neighborhood(db_path, query_author_name, max_authors=10)
-        positive_ids.update(coauthor_ids)
-        logger.debug(f"Query {query['paper_id']}: {len(coauthor_ids)} coauthor neighbors")
+    # Strategy 2: Co-author neighborhood (strong signal)
+    # Increase from 10 to 20 for more diversity
+    coauthor_ids = get_coauthor_neighborhood(db_path, query_author_name, max_authors=20)
+    positive_ids.update(coauthor_ids)
+    logger.debug(f"Query {query['paper_id']}: {len(coauthor_ids)} coauthor neighbors")
     
     # Strategy 3: Weak positives (TF-IDF + embedding similarity)
-    if len(positive_ids) < n_positives:
-        query_text = f"{query['title']} {query['abstract']}"
-        weak_positives = get_weak_positive_authors(
-            query_text=query_text,
-            db_path=db_path,
-            tfidf_engine=tfidf_engine,
-            faiss_index=faiss_index,
-            id_map=id_map,
-            emb_model=emb_model,
-            query_author_id=query_author_id,
-            topn=n_positives * 2
-        )
-        positive_ids.update(weak_positives)
-        logger.debug(f"Query {query['paper_id']}: {len(weak_positives)} weak positives")
+    # ALWAYS add weak positives to increase label diversity
+    query_text = f"{query['title']} {query['abstract']}"
+    weak_positives = get_weak_positive_authors(
+        query_text=query_text,
+        db_path=db_path,
+        tfidf_engine=tfidf_engine,
+        faiss_index=faiss_index,
+        id_map=id_map,
+        emb_model=emb_model,
+        query_author_id=query_author_id,
+        topn=n_positives * 3  # Get more candidates for diversity
+    )
+    positive_ids.update(weak_positives)
+    logger.debug(f"Query {query['paper_id']}: {len(weak_positives)} weak positives")
     
     # Remove query author (COI)
     positive_ids.discard(query_author_id)
@@ -513,8 +507,8 @@ def build_training_data(
     id_map_path: Path,
     output_path: Path,
     n_queries: int = 100,
-    n_positives: int = 3,
-    n_negatives: int = 20,
+    n_positives: int = 10,
+    n_negatives: int = 15,
     min_year: Optional[int] = None,
     seed: int = 42
 ) -> bool:

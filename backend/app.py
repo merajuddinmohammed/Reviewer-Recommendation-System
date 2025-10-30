@@ -463,25 +463,36 @@ def rank_candidates(
         return []
     
     # Compute scores
-    use_lgbm = False  # Temporarily disabled - model needs retraining
+    use_lgbm = True  # Re-enabled after retraining
     
     if models.lgbm_model is not None and use_lgbm:
         # Use LightGBM model
         try:
             X = features_df[available_features].fillna(0)
-            scores = models.lgbm_model.predict(X)
+            scores_lgbm = models.lgbm_model.predict(X)
             
-            # Check if scores are valid (not all the same)
-            if len(set(scores)) <= 1 or np.all(scores < 0):
-                logger.warning(f"LightGBM returned invalid scores (all {scores[0] if len(scores) > 0 else 'N/A'}), falling back to weighted scoring")
-                scores = features_df.apply(compute_weighted_score, axis=1).values
-                model_used = "weighted"
+            # Check if scores are valid (have variance)
+            score_std = np.std(scores_lgbm)
+            if score_std < 0.01:  # Very low variance, model isn't discriminating
+                logger.warning(f"LightGBM has low variance (std={score_std:.4f}), combining with weighted scoring")
+                # Combine LGBM with weighted scoring (60% weighted, 40% LGBM)
+                scores_weighted = features_df.apply(compute_weighted_score, axis=1).values
+                # Normalize both to 0-1
+                if scores_lgbm.max() > scores_lgbm.min():
+                    scores_lgbm_norm = (scores_lgbm - scores_lgbm.min()) / (scores_lgbm.max() - scores_lgbm.min())
+                else:
+                    scores_lgbm_norm = np.zeros_like(scores_lgbm)
+                scores = 0.6 * scores_weighted + 0.4 * scores_lgbm_norm
+                model_used = "hybrid-lgbm"
+                logger.info(f"Using hybrid weighted+LGBM scoring")
             else:
                 # Normalize LightGBM scores to 0-1 range
-                scores_min = scores.min()
-                scores_max = scores.max()
+                scores_min = scores_lgbm.min()
+                scores_max = scores_lgbm.max()
                 if scores_max > scores_min:
-                    scores = (scores - scores_min) / (scores_max - scores_min)
+                    scores = (scores_lgbm - scores_min) / (scores_max - scores_min)
+                else:
+                    scores = np.zeros_like(scores_lgbm)
                 model_used = "lgbm"
                 logger.info(f"Using LightGBM model for ranking")
         except Exception as e:

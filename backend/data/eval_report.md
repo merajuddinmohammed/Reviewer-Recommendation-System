@@ -1,8 +1,8 @@
 # Evaluation Report - Ranking Method Comparison
 
-**Generated**: 2025-10-30 21:47:36
+**Generated**: 2025-10-31 02:40:49
 
-**Number of Queries**: 81
+**Number of Queries**: 30
 
 **Evaluation Metrics**: Precision@5 (P@5), nDCG@10
 
@@ -12,18 +12,18 @@
 
 | Method | P@5 Mean | P@5 Std | nDCG@10 Mean | nDCG@10 Std |
 |--------|----------|---------|--------------|-------------|
-| TF-IDF Only | 0.9605 | 0.1158 | 0.7922 | 0.1133 |
-| Embeddings Only | 0.9802 | 0.0600 | 0.7978 | 0.0949 |
-| Hybrid Weighted | 0.6988 | 0.1847 | 0.6068 | 0.1477 |
-| LambdaRank | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
+| TF-IDF Only | 0.9267 | 0.1530 | 0.7703 | 0.1398 |
+| Embeddings Only | 0.9733 | 0.0691 | 0.7946 | 0.1010 |
+| Hybrid Weighted | 0.7133 | 0.1871 | 0.6250 | 0.1332 |
+| LambdaRank | 0.5333 | 0.2057 | 0.4959 | 0.1683 |
 
 ---
 
 ## Best Performing Method
 
-**By P@5**: Embeddings Only (0.9802)
+**By P@5**: Embeddings Only (0.9733)
 
-**By nDCG@10**: Embeddings Only (0.7978)
+**By nDCG@10**: Embeddings Only (0.7946)
 
 ---
 
@@ -31,7 +31,7 @@
 
 ### Lexical vs Semantic
 
-**Semantic matching (embeddings)** outperforms lexical matching (TF-IDF) by 0.0198 on P@5. This suggests that semantic understanding is more important than keyword matching for reviewer recommendation.
+**Semantic matching (embeddings)** outperforms lexical matching (TF-IDF) by 0.0467 on P@5. This suggests that semantic understanding is more important than keyword matching for reviewer recommendation.
 
 ### Hybrid Approach
 

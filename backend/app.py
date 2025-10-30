@@ -27,6 +27,7 @@ import tempfile
 from pathlib import Path
 from typing import List, Dict, Optional, Any
 from contextlib import asynccontextmanager
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -407,8 +408,9 @@ def get_evidence_papers(
                 paper_text = f"{title} {abstract}"
                 paper_vec = models.tfidf_vectorizer.transform([paper_text])
                 
-                # Cosine similarity
-                similarity = float(query_vec.multiply(paper_vec.T).toarray()[0, 0])
+                # Cosine similarity using sklearn's method
+                from sklearn.metrics.pairwise import cosine_similarity
+                similarity = float(cosine_similarity(query_vec, paper_vec)[0, 0])
                 
                 paper_scores.append({
                     "paper_title": title,
@@ -461,19 +463,33 @@ def rank_candidates(
         return []
     
     # Compute scores
-    if models.lgbm_model is not None:
+    use_lgbm = False  # Temporarily disabled - model needs retraining
+    
+    if models.lgbm_model is not None and use_lgbm:
         # Use LightGBM model
         try:
             X = features_df[available_features].fillna(0)
             scores = models.lgbm_model.predict(X)
-            model_used = "lgbm"
-            logger.info(f"Using LightGBM model for ranking")
+            
+            # Check if scores are valid (not all the same)
+            if len(set(scores)) <= 1 or np.all(scores < 0):
+                logger.warning(f"LightGBM returned invalid scores (all {scores[0] if len(scores) > 0 else 'N/A'}), falling back to weighted scoring")
+                scores = features_df.apply(compute_weighted_score, axis=1).values
+                model_used = "weighted"
+            else:
+                # Normalize LightGBM scores to 0-1 range
+                scores_min = scores.min()
+                scores_max = scores.max()
+                if scores_max > scores_min:
+                    scores = (scores - scores_min) / (scores_max - scores_min)
+                model_used = "lgbm"
+                logger.info(f"Using LightGBM model for ranking")
         except Exception as e:
             logger.warning(f"LightGBM prediction failed: {e}, falling back to weighted scoring")
             scores = features_df.apply(compute_weighted_score, axis=1).values
             model_used = "weighted"
     else:
-        # Use weighted scoring
+        # Use weighted scoring (default)
         scores = features_df.apply(compute_weighted_score, axis=1).values
         model_used = "weighted"
         logger.info(f"Using weighted scoring for ranking")
@@ -498,8 +514,8 @@ def rank_candidates(
     for idx, row in top_k.iterrows():
         results.append({
             'author_id': int(row['author_id']),
-            'name': row.get('name', 'Unknown'),
-            'affiliation': row.get('affiliation'),
+            'name': row.get('author_name', 'Unknown'),  # Fixed: use 'author_name' column from ranker.py
+            'affiliation': row.get('affiliation', 'Not specified'),  # Add default for affiliation
             'score': float(row['score'])
         })
     
@@ -543,6 +559,67 @@ async def health():
         models_loaded=models_status,
         database_path=str(models.db_path) if models.db_path else None
     )
+
+
+@app.get("/eval-report", tags=["Evaluation"])
+async def get_eval_report():
+    """
+    Get evaluation report showing model performance metrics.
+    
+    Returns:
+        Evaluation metrics including P@5, nDCG@10 for different ranking methods
+    """
+    eval_report_path = Path("data/eval_report.md")
+    eval_csv_path = Path("data/eval_metrics_per_query.csv")
+    
+    if not eval_report_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Evaluation report not found"
+        )
+    
+    # Read markdown report
+    with open(eval_report_path, 'r', encoding='utf-8') as f:
+        markdown_content = f.read()
+    
+    # Read CSV metrics if available
+    metrics_data = None
+    if eval_csv_path.exists():
+        try:
+            import pandas as pd
+            df = pd.read_csv(eval_csv_path)
+            
+            # Calculate summary statistics
+            metrics_data = {
+                "total_queries": len(df),
+                "methods": []
+            }
+            
+            for method_prefix, method_name in [
+                ("tfidf", "TF-IDF Only"),
+                ("emb", "Embeddings Only"),
+                ("hybrid", "Hybrid Weighted"),
+                ("lambdarank", "LambdaRank")
+            ]:
+                p5_col = f"{method_prefix}_p5"
+                ndcg_col = f"{method_prefix}_ndcg10"
+                
+                if p5_col in df.columns and not df[p5_col].isna().all():
+                    metrics_data["methods"].append({
+                        "name": method_name,
+                        "p5_mean": float(df[p5_col].mean()),
+                        "p5_std": float(df[p5_col].std()),
+                        "ndcg10_mean": float(df[ndcg_col].mean()),
+                        "ndcg10_std": float(df[ndcg_col].std())
+                    })
+        except Exception as e:
+            logger.warning(f"Failed to load eval CSV: {e}")
+    
+    return {
+        "markdown": markdown_content,
+        "metrics": metrics_data,
+        "generated_at": datetime.fromtimestamp(eval_report_path.stat().st_mtime).isoformat() if eval_report_path.exists() else None
+    }
 
 
 @app.post("/recommend", response_model=RecommendResponse, tags=["Recommendations"])

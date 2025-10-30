@@ -32,8 +32,8 @@ Thumbs.db
 *.log
 ingest.log
 
-# Large data files
-*.db
+# Large data files (excluding papers.db which is needed for deployment)
+# *.db - Commented out to include papers.db
 *.db-journal
 
 # Model files (optional - uncomment if you want to exclude large models)

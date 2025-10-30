@@ -21,6 +21,8 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
+      - key: VITE_API_BASE
+        value: https://reviewer-recommendation-system.onrender.com
     routes:
       - type: rewrite
         source: /*

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import FileUploader from './components/FileUploader'
 import ReviewerList from './components/ReviewerList'
+import EvaluationReport from './components/EvaluationReport'
 import './App.css'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
@@ -41,6 +42,9 @@ function App() {
             onLoadingChange={setLoading}
           />
         </div>
+
+        {/* Evaluation Report */}
+        <EvaluationReport apiBase={API_BASE} />
 
         {error && (
           <div className="error-box">

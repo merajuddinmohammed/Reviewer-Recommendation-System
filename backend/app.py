@@ -79,6 +79,7 @@ class ModelStore:
         self.id_map = None
         self.bertopic_model = None
         self.lgbm_model = None
+        self.embeddings = None  # For encoding queries
         
     def is_ready(self) -> bool:
         """Check if essential models are loaded."""
@@ -178,8 +179,8 @@ async def lifespan(app: FastAPI):
     # Load TF-IDF vectorizer (REQUIRED)
     if TFIDF_MODEL_PATH.exists():
         try:
-            import joblib
-            models.tfidf_vectorizer = joblib.load(TFIDF_MODEL_PATH)
+            from tfidf_engine import TFIDFEngine
+            models.tfidf_vectorizer = TFIDFEngine.load(str(TFIDF_MODEL_PATH))
             logger.info(f"✓ TF-IDF vectorizer loaded from {TFIDF_MODEL_PATH}")
         except Exception as e:
             logger.error(f"✗ Failed to load TF-IDF vectorizer: {e}")
@@ -208,6 +209,14 @@ async def lifespan(app: FastAPI):
             logger.error(f"✗ Failed to load FAISS ID map: {e}")
     else:
         logger.warning(f"✗ FAISS ID map not found at {FAISS_ID_MAP_PATH}")
+    
+    # Load Embeddings model (REQUIRED for query encoding)
+    try:
+        from embedding import Embeddings
+        models.embeddings = Embeddings()
+        logger.info("✓ Embeddings model initialized (SciBERT)")
+    except Exception as e:
+        logger.error(f"✗ Failed to initialize embeddings model: {e}")
     
     # Load BERTopic model (OPTIONAL)
     if BERTOPIC_MODEL_PATH.exists():
@@ -645,8 +654,8 @@ async def recommend(
         
         features_df = make_features_for_query(
             query_text=query_text,
-            db=models.db_path,
-            tfidf_engine=models.tfidf,
+            db=str(models.db_path),
+            tfidf_engine=models.tfidf_vectorizer,
             faiss_index=models.faiss_index,
             id_map=models.id_map,
             embedding_model=models.embeddings,
